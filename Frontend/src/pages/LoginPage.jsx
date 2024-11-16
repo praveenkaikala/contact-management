@@ -6,14 +6,15 @@ const LoginPage = () => {
     const navigate=useNavigate()
   return (
     <div className="h-screen flex">
-      {/* Left Section - Background Image */}
       <div
         className="hidden md:flex w-1/2 bg-cover bg-center"
         style={{
           backgroundImage:
             "url('https://img.freepik.com/free-vector/login-concept-illustration_114360-739.jpg?w=740')",
         }}
-      ></div>
+      >
+        
+      </div>
 
       
       <div className="flex-1 flex items-center justify-center bg-inherit">
@@ -21,7 +22,6 @@ const LoginPage = () => {
         <h2 className="text-3xl font-semibold text-gray-700 text-center mb-4">Login</h2>
 
           <form>
-            {/* Email Field */}
             <div className="mb-4">
               <TextField
                 id="email"
@@ -29,7 +29,6 @@ const LoginPage = () => {
                 type="email"
                 variant="outlined"
                 fullWidth
-                margin="dense"
                 placeholder="Enter your email"
               />
             </div>
@@ -42,7 +41,6 @@ const LoginPage = () => {
                 type="password"
                 variant="outlined"
                 fullWidth
-                margin="dense"
                 placeholder="Enter your password"
               />
             </div>

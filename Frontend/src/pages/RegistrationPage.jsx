@@ -11,45 +11,39 @@ const RegistrationPage = () => {
           <h2 className="text-3xl font-semibold text-gray-700 text-center mb-4">Register</h2>
           <form>
             <div className="mb-4">
-              <FormLabel htmlFor="name" className="text-gray-600 font-medium">
-                Full Name
-              </FormLabel>
               <TextField
                 id="name"
                 variant="outlined"
                 fullWidth
-                placeholder="Enter your name"
-                margin="dense"
+               
+               label="Name"
               />
             </div>
 
           
             <div className="mb-4">
-              <FormLabel htmlFor="email" className="text-gray-600 font-medium">
-                Email
-              </FormLabel>
+              
               <TextField
                 id="email"
                 type="email"
                 variant="outlined"
+                label="Email"
                 fullWidth
-                placeholder="Enter your email"
-                margin="dense"
+            
+               
               />
             </div>
 
          
             <div className="mb-4">
-              <FormLabel htmlFor="password" className="text-gray-600 font-medium">
-                Password
-              </FormLabel>
+              
               <TextField
                 id="password"
                 type="password"
+                label="Password"
                 variant="outlined"
                 fullWidth
-                placeholder="Create a password"
-                margin="dense"
+               
               />
             </div>
 
