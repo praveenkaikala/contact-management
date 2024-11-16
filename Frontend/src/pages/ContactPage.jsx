@@ -23,7 +23,7 @@ import EditContact from "../components/EditContact";
 import DeleteContact from "../components/DeleteContact";
 
 const ContactPage = () => {
-  const [addDrawer,setAddDrawer]=useState(true)
+  const [addDrawer,setAddDrawer]=useState(false)
   const [editDrawer,setEditDrawer]=useState(false)
   const [deleteModal,setDeleteModal]=useState(false)
   const rows = [
