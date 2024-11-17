@@ -6,6 +6,9 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
 import PageNotFound from "./pages/PageNotFound";
+const checkToken = () => {
+  return JSON.parse(localStorage.getItem("userData"));
+};
 
 function App() {
   const [count, setCount] = useState(0);

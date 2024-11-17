@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Paper,
   Table,
@@ -16,32 +16,52 @@ import {
   Modal,
   Box,
   Typography,
+  Skeleton,
 } from "@mui/material";
 import { Search, Edit, Delete, Anchor } from "@mui/icons-material";
 import AddContact from "../components/AddContact";
 import EditContact from "../components/EditContact";
 import DeleteContact from "../components/DeleteContact";
+import AxiosPrivate from "../utils/AxiosPrivate";
+import { getToken } from "../utils/getToken";
 
 const ContactPage = () => {
-  const [addDrawer,setAddDrawer]=useState(false)
-  const [editDrawer,setEditDrawer]=useState(false)
-  const [deleteModal,setDeleteModal]=useState(false)
-  const rows = [
-    { name: "John Doe", calories: 200, fat: 5, carbs: 20, protein: 15 },
-    { name: "Jane Smith", calories: 150, fat: 2, carbs: 30, protein: 20 },
-    { name: "Samuel Green", calories: 180, fat: 6, carbs: 25, protein: 18 },
-    { name: "Alice Brown", calories: 220, fat: 8, carbs: 22, protein: 12 },
-    { name: "Michael White", calories: 170, fat: 4, carbs: 18, protein: 10 },
-  ];
-
+  const [addDrawer, setAddDrawer] = useState(false);
+  const [editDrawer, setEditDrawer] = useState(false);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [update,setUpdate]=useState(false)
   const [search, setSearch] = useState("");
-  const [page, setPage] =useState(0);
+  const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(5);
-
-  const filteredRows = rows.filter((row) =>
-    row.name.toLowerCase().includes(search.toLowerCase())
+  const [contacts, setContacts] = useState([]);
+  const [selectedData,setSelectedData]=useState(null)
+  const [loading,setloading]=useState(false)
+  const filteredRows = contacts.filter((row) =>
+    row.firstName.toLowerCase().includes(search.toLowerCase())
   );
-
+  const fetchContacts = async () => {
+    try {
+      setloading(true)
+      const {token} = await getToken(); 
+      console.log("token",token)
+      const headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      };
+  
+      const data = await AxiosPrivate.get("/contacts", { headers });
+      setContacts(data.data)
+    } catch (error) {
+      console.log(error);
+    }
+    finally{
+      setloading(false)
+    }
+   
+  };
+  useEffect(() => {
+    fetchContacts();
+  }, [update]);
   const handlePageChange = (event, newPage) => setPage(newPage);
   const handleRowsPerPageChange = (event) =>
     setRowsPerPage(+event.target.value);
@@ -58,8 +78,8 @@ const ContactPage = () => {
             color="primary"
             size="large"
             className="mt-4"
-            onClick={()=>{
-              setAddDrawer(true)
+            onClick={() => {
+              setAddDrawer(true);
             }}
           >
             Add Contact
@@ -72,7 +92,15 @@ const ContactPage = () => {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <TableContainer component={Paper}>
+      {loading?(
+        <Skeleton variant="wave" sx={{
+          width:"100%",
+          height:"300px",
+          marginTop:"20px"
+        }}/>
+      ):(
+        <>
+          <TableContainer component={Paper}>
           <Table
             sx={{ minWidth: 650 }}
             aria-label="contacts table"
@@ -80,14 +108,13 @@ const ContactPage = () => {
           >
             <TableHead>
               <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell align="right">First Name</TableCell>
-                <TableCell align="right">Last Name</TableCell>
-                <TableCell align="right">Email</TableCell>
-                <TableCell align="right">Phone Number</TableCell>
-                <TableCell align="right">Company</TableCell>
-                <TableCell align="right">Job Title</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell align="left">First Name</TableCell>
+                <TableCell align="left">Last Name</TableCell>
+                <TableCell align="left">Email</TableCell>
+                <TableCell align="left">Phone Number</TableCell>
+                <TableCell align="left">Company</TableCell>
+                <TableCell align="left">Job Title</TableCell>
+                <TableCell align="left">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -103,26 +130,32 @@ const ContactPage = () => {
                     }}
                   >
                     <TableCell component="th" scope="row">
-                      {row.name}
+                      {row.firstName}
                     </TableCell>
-                    <TableCell align="right">{row.calories}</TableCell>
-                    <TableCell align="right">{row.fat}</TableCell>
-                    <TableCell align="right">{row.fat}</TableCell>
-                    <TableCell align="right">{row.fat}</TableCell>
-                    <TableCell align="right">{row.carbs}</TableCell>
-                    <TableCell align="right">{row.protein}</TableCell>
-                    <TableCell align="right">
-                      <Tooltip title="Edit" onClick={()=>setEditDrawer(true)}>
-
-                      <IconButton color="primary" size="small">
-                        <Edit />
-                      </IconButton>
+                    <TableCell align="left">{row.lastName}</TableCell>
+                    <TableCell align="left">{row.email}</TableCell>
+                    <TableCell align="left">{row.phone}</TableCell>
+                    <TableCell align="left">{row.jobTitle}</TableCell>
+                    <TableCell align="left">{row.company}</TableCell>
+                    <TableCell align="left">
+                      <Tooltip title="Edit" onClick={() =>{
+                        setSelectedData(row)
+                        setEditDrawer(true)}}>
+                        <IconButton color="primary" size="small">
+                          <Edit />
+                        </IconButton>
                       </Tooltip>
                       <Tooltip title="Delete">
-
-                      <IconButton color="error" size="small" onClick={()=>setDeleteModal(true)}>
-                        <Delete />
-                      </IconButton>
+                        <IconButton
+                          color="error"
+                          size="small"
+                          onClick={() => {
+                            setSelectedData(row)
+                            setDeleteModal(true)}
+                          }
+                        >
+                          <Delete />
+                        </IconButton>
                       </Tooltip>
                     </TableCell>
                   </TableRow>
@@ -141,42 +174,50 @@ const ContactPage = () => {
         <TablePagination
           rowsPerPageOptions={[5, 10, 15]}
           component="div"
-          count={filteredRows.length}
+          count={contacts.length}
           rowsPerPage={rowsPerPage}
           page={page}
           onPageChange={handlePageChange}
           onRowsPerPageChange={handleRowsPerPageChange}
         />
 
+        </>
+      )}
+        <Drawer
+          open={addDrawer}
+          onClose={() => setAddDrawer(false)}
+          anchor="right"
+          PaperProps={{
+            sx: {
+              width: "40%",
+              height: "100%",
+            },
+          }}
+        >
+          <AddContact update={update} setAddDrawer={setAddDrawer} setUpdate={setUpdate}/>
+        </Drawer>
+        <Drawer
+          open={editDrawer}
+          onClose={() => setEditDrawer(false)}
+          anchor="right"
+          PaperProps={{
+            sx: {
+              width: "40%",
+              height: "100%",
+            },
+          }}
+        >
+          <EditContact firstName={selectedData?.firstName} lastName={selectedData?.lastName} email={selectedData?.email} phone={selectedData?.phone} jobTitle={selectedData?.jobTitle} company={selectedData?.company} id={selectedData?._id} update={update} setUpdate={setUpdate} setEditdrawer={setEditDrawer}/>
+        </Drawer>
 
-<Drawer open={addDrawer} onClose={()=>setAddDrawer(false) } anchor="right" 
-   PaperProps={{
-    sx: {
-      width: '40%', 
-      height: '100%',
-    },
-  }}>
-    <AddContact/>
-</Drawer>
-<Drawer open={editDrawer} onClose={()=>setEditDrawer(false) } anchor="right" 
-   PaperProps={{
-    sx: {
-      width: '40%', 
-      height: '100%',
-    },
-  }}>
-    <EditContact/>
-</Drawer>
-
-<Modal
-      open={deleteModal}
-      onClose={()=>setDeleteModal(false)}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
-      <DeleteContact/>
-    </Modal>
-
+        <Modal
+          open={deleteModal}
+          onClose={() => setDeleteModal(false)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <DeleteContact id={selectedData?._id} setDeleteModal={setDeleteModal} update={update} setUpdate={setUpdate}/>
+        </Modal>
       </div>
     </div>
   );

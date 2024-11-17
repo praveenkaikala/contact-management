@@ -5,20 +5,25 @@ import {
   Box,
   Typography,
   Alert,
+  CircularProgress,
 } from "@mui/material";
+import { getToken } from "../utils/getToken";
+import AxiosPrivate from "../utils/AxiosPrivate";
 
-const EditContact = () => {
+const EditContact = ({ id, firstName, lastName, company, jobTitle, email, phone,update,setUpdate,setEditdrawer }) => {
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    company: "",
-    jobTitle: "",
+    firstName: firstName,
+    lastName: lastName,
+    email: email,
+    phone: phone,
+    company: company,
+    jobTitle: jobTitle,
   });
 
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Handle form input changes
   const handleChange = (e) => {
@@ -43,76 +48,87 @@ const EditContact = () => {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const newErrors = validate();
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       setSuccessMessage("");
+      setErrorMessage("");
     } else {
-      console.log("Form submitted successfully:", formData);
-      setErrors({});
-      setSuccessMessage("Contact added successfully!");
-      // Reset form
-      setFormData({
-        firstName: "",
-        lastName: "",
-        email: "",
-        phone: "",
-        company: "",
-        jobTitle: "",
-      });
+      try {
+        setLoading(true);
+        const { token, userId } = await getToken();
+        const headers = {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        };
+
+        await AxiosPrivate.put(`/contacts/${id}`, formData, { headers });
+        setUpdate(!update)
+
+        setSuccessMessage("Contact updated successfully!");
+        setErrorMessage("");
+      
+      } catch (error) {
+        setErrorMessage("Failed to update contact. Please try again.");
+        setSuccessMessage("");
+        console.error(error);
+      } finally {
+        setLoading(false);
+        setTimeout(() => {
+            setEditdrawer(false)
+        }, 2000);
+      }
     }
   };
 
   return (
-    <div className="p-5"
-    >
+    <div className="p-5">
       <Typography variant="h5" gutterBottom className="mb-3">
         Edit Contact
       </Typography>
       {successMessage && <Alert severity="success">{successMessage}</Alert>}
+      {errorMessage && <Alert severity="error">{errorMessage}</Alert>}
       <div className="flex flex-col justify-between">
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div>
+            {[
+              { label: "First Name", name: "firstName", type: "text" },
+              { label: "Last Name", name: "lastName", type: "text" },
+              { label: "Email", name: "email", type: "email" },
+              { label: "Phone Number", name: "phone", type: "text" },
+              { label: "Company", name: "company", type: "text" },
+              { label: "Job Title", name: "jobTitle", type: "text" },
+            ].map(({ label, name, type }) => (
+              <Box key={name} sx={{ mb: 2 }}>
+                <TextField
+                  fullWidth
+                  label={label}
+                  name={name}
+                  type={type}
+                  value={formData[name]}
+                  onChange={handleChange}
+                  error={!!errors[name]}
+                  helperText={errors[name]}
+                  variant="outlined"
+                />
+              </Box>
+            ))}
+          </div>
 
-      <form onSubmit={handleSubmit} className=" flex flex-col      ">
-        <div>
-
-        {[
-          { label: "First Name", name: "firstName", type: "text" },
-          { label: "Last Name", name: "lastName", type: "text" },
-          { label: "Email", name: "email", type: "email" },
-          { label: "Phone Number", name: "phone", type: "text" },
-          { label: "Company", name: "company", type: "text" },
-          { label: "Job Title", name: "jobTitle", type: "text" },
-        ].map(({ label, name, type }) => (
-          <Box key={name} sx={{ mb: 2 }}>
-            <TextField
-              fullWidth
-              label={label}
-              name={name}
-              type={type}
-              value={formData[name]}
-              onChange={handleChange}
-              error={!!errors[name]}
-              helperText={errors[name]}
-              variant="outlined"
-            />
-          </Box>
-        ))}
-        </div>
-       
-      <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          fullWidth
-          size="large"
-          className="mb-8"
-        >
-          Add Contact
-        </Button>
-      </form>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            size="large"
+            className="mb-8"
+          >
+            {loading ? <CircularProgress color="inherit" size={24} /> : "Edit Contact"}
+          </Button>
+        </form>
       </div>
     </div>
   );

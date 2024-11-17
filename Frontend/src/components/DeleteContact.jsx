@@ -1,7 +1,30 @@
-import { Box, Button, Typography } from '@mui/material'
-import React from 'react'
+import { Box, Button, CircularProgress, Typography } from '@mui/material'
+import React, { useState } from 'react'
+import { getToken } from '../utils/getToken';
+import AxiosPrivate from '../utils/AxiosPrivate';
 
-const DeleteContact = () => {
+const DeleteContact = ({id,setDeleteModal,update,setUpdate}) => {
+    const [loading,setLoading]=useState(false)
+    const deleteContact=async()=>{
+        try {
+            setLoading(true)
+            const {token} = await getToken(); 
+        console.log("token",token)
+        const headers = {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+        };
+    
+        const data = await AxiosPrivate.delete(`/contacts/${id}`,{ headers });
+        setUpdate(!update)
+        setDeleteModal(false)
+        } catch (error) {
+            console.log(error)
+        }
+        finally{
+            setLoading(false)
+        }
+    }
   return (
     <div><Box
     sx={{
@@ -28,15 +51,15 @@ const DeleteContact = () => {
       <Button
         variant="contained"
         color="error"
-      
+      onClick={deleteContact}
         sx={{ px: 3 }}
       >
-        Yes, Delete
+       {loading?<CircularProgress color="inherit"/>:"Delete"}
       </Button>
       <Button
         variant="outlined"
         color="primary"
-       
+       onClick={()=>setDeleteModal(false)}
         sx={{ px: 3 }}
       >
         No, Cancel

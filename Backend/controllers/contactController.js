@@ -6,7 +6,7 @@ require("dotenv").config()
 
 const ListContacts=async(req,res)=>{
     try {
-        const contacts=await Contact.find({userId:req.user.id}).limit(1)
+        const contacts=await Contact.find({userId:req.user.id})
         if(contacts)
         {
 
