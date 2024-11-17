@@ -1,21 +1,44 @@
 import { FormLabel, Input, TextField, Button } from '@mui/material';
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import AxiosPrivate from '../utils/AxiosPrivate';
 
 const RegistrationPage = () => {
     const navigate=useNavigate()
+    const [formData, setFormData] = useState({
+     name:"",
+      email: "",
+     password:""
+    });
+    const handleChange = (e) => {
+      const { name, value } = e.target;
+      setFormData({ ...formData, [name]: value });
+    };
+
+    const handleSubmit =async (e) => {
+      e.preventDefault();
+  try {
+    const response=await AxiosPrivate.post("/user/register",formData)
+    localStorage.setItem("userData",JSON.stringify(response.data))
+    navigate('/ ')
+    console.log(response.data)
+  } catch (error) {
+    console.log(error)
+  }
+    };
   return (
     <div className="h-screen flex">
       <div className="flex-1 flex items-center justify-center bg-inherit">
         <div className="w-full max-w-md p-8 bg-gray-100 rounded-lg shadow-lg">
           <h2 className="text-3xl font-semibold text-gray-700 text-center mb-4">Register</h2>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <TextField
-                id="name"
+              
                 variant="outlined"
                 fullWidth
-               
+               name="name"
+               onChange={handleChange}
                label="Name"
               />
             </div>
@@ -24,11 +47,13 @@ const RegistrationPage = () => {
             <div className="mb-4">
               
               <TextField
-                id="email"
+              
                 type="email"
+                name="email"
                 variant="outlined"
                 label="Email"
                 fullWidth
+                onChange={handleChange}
             
                
               />
@@ -38,11 +63,12 @@ const RegistrationPage = () => {
             <div className="mb-4">
               
               <TextField
-                id="password"
+               name="password"
                 type="password"
                 label="Password"
                 variant="outlined"
                 fullWidth
+                onChange={handleChange}
                
               />
             </div>
@@ -53,6 +79,7 @@ const RegistrationPage = () => {
               color="primary"
               fullWidth
               size="large"
+              type='submit'
               className="mt-4"
             >
               Register
