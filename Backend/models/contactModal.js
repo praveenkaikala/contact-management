@@ -11,7 +11,7 @@ const messageModel = mongoose.Schema(
     firstName: {
       type: String,
       trim: true,
-      required: [true, "First name is required"], d
+      required: [true, "First name is required"], 
     },
     lastName: {
       type: String,
