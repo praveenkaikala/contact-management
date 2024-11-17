@@ -131,9 +131,7 @@ module.exports = mongoose.model('User', userSchema);
 ```
 
 #### Contact Schema (`contactSchema.js`)
-
-const mongoose = require("mongoose");
-
+```js
 
 const messageModel = mongoose.Schema(
   {
@@ -182,6 +180,7 @@ const messageModel = mongoose.Schema(
 );
 
 const Contact = mongoose.model("Contact", messageModel);
+
 ```
 ---
 
